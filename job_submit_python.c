@@ -810,6 +810,32 @@ PyObject* load_script()
 
 	return pModuleInitial;
 }
+/*
+ * Load the Python modify-job script and return it
+ */
+PyObject* load_modify_script()
+{
+	char script_name[] = "job_modify";
+
+	// Import the job_submit module
+	PyObject *pModuleInitial = PyImport_ImportModule(script_name);
+
+	if (pModuleInitial != NULL)
+	{
+		verbose("job_modify_python: Loaded \"%s\"", script_name);
+
+		// Reload the module to ensure live updating the script works
+		PyObject* pModule = PyImport_ReloadModule(pModuleInitial);
+		Py_DECREF(pModuleInitial);
+
+		return pModule;
+	}
+
+	error("job_modify_python: Failed to load \"%s\"", script_name);
+	print_python_error();
+
+	return pModuleInitial;
+}
 
 /*
  * Load and run the job submit script and call the ``job_submit`` function
@@ -900,6 +926,81 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char
 extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid)
 {
 	slurm_mutex_lock(&python_lock);
+	PyObject* pModule = load_script();
+	if (pModule != NULL)
+	{
+		PyObject* pFunc = PyObject_GetAttrString(pModule, "job_modify");
+		if (pFunc && PyCallable_Check(pFunc))
+		{
+			PyObject* pJobDesc = create_job_desc_dict(job_desc);
+			PyObject* p_submit_uid = PyLong_FromUnsignedLongLong(submit_uid);
+
+			PyObject* pRc = PyObject_CallFunctionObjArgs(pFunc, pJobDesc, p_submit_uid, NULL);
+			Py_DECREF(p_submit_uid);
+
+			if (pRc != NULL)
+			{
+				if(!PyLong_Check(pRc))
+				{
+					error("job_modify_python: return value of function must be an integer, not %s", Py_TYPE(pRc)->tp_name);
+					Py_DECREF(pRc);
+					Py_DECREF(pJobDesc);
+					Py_DECREF(pFunc);
+					Py_DECREF(pModule);
+					return SLURM_ERROR;
+				}
+				long rc = PyLong_AsLong(pRc);
+				Py_DECREF(pRc);
+
+				retrieve_job_desc_dict(job_desc, pJobDesc);
+				Py_DECREF(pJobDesc);
+
+				if (user_msg) {
+					*err_msg = user_msg;
+					user_msg = NULL;
+				}
+
+				if (rc != SLURM_SUCCESS)
+				{
+					Py_DECREF(pFunc);
+					Py_DECREF(pModule);
+					slurm_mutex_unlock(&python_lock);
+					return rc;
+				}
+			}
+			else
+			{
+				Py_DECREF(pJobDesc);
+				Py_DECREF(pFunc);
+				Py_DECREF(pModule);
+
+				error("job_modify_python: Call failed");
+				print_python_error();
+
+				slurm_mutex_unlock(&python_lock);
+				return SLURM_ERROR;
+			}
+		}
+		else
+		{
+			error("job_modify_python: Cannot find function \"%s\"", "job_modify");
+			print_python_error();
+
+			Py_XDECREF(pFunc);
+			Py_DECREF(pModule);
+			slurm_mutex_unlock(&python_lock);
+			return SLURM_ERROR;
+		}
+		Py_XDECREF(pFunc);
+		Py_DECREF(pModule);
+	}
+	else
+	{
+		print_python_error();
+		slurm_mutex_unlock(&python_lock);
+		return SLURM_ERROR;
+	}
+
 	slurm_mutex_unlock(&python_lock);
 	return SLURM_SUCCESS;
 }
