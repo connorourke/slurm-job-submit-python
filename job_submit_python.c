@@ -923,7 +923,7 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char
 	return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid, char **err_msg)
+extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t modify_uid, char **err_msg)
 {
 	slurm_mutex_lock(&python_lock);
 	PyObject* pModule = load_script();
@@ -933,10 +933,10 @@ extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_pt
 		if (pFunc && PyCallable_Check(pFunc))
 		{
 			PyObject* pJobDesc = create_job_desc_dict(job_desc);
-			PyObject* p_submit_uid = PyLong_FromUnsignedLongLong(submit_uid);
+			PyObject* p_modify_uid = PyLong_FromUnsignedLongLong(modify_uid);
 
-			PyObject* pRc = PyObject_CallFunctionObjArgs(pFunc, pJobDesc, p_submit_uid, NULL);
-			Py_DECREF(p_submit_uid);
+			PyObject* pRc = PyObject_CallFunctionObjArgs(pFunc, pJobDesc, p_modify_uid, NULL);
+			Py_DECREF(p_modify_uid);
 
 			if (pRc != NULL)
 			{
