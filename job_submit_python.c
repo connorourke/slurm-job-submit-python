@@ -926,7 +926,7 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char
 extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t modify_uid, char **err_msg)
 {
 	slurm_mutex_lock(&python_lock);
-	PyObject* pModule = load_script();
+	PyObject* pModule = load_modify_script();
 	if (pModule != NULL)
 	{
 		PyObject* pFunc = PyObject_GetAttrString(pModule, "job_modify");
