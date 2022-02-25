@@ -42,6 +42,15 @@ static char *user_msg = NULL;
 
 static pthread_mutex_t python_lock = PTHREAD_MUTEX_INITIALIZER;
 
+/*static PyObject* slurm_info(PyObject *self, PyObject *arg)
+{
+	PyObject* str = PyObject_Str(arg);
+	info("job_submit_python: %s", PyUnicode_AsUTF8(str));
+	Py_DECREF(str);
+	Py_RETURN_NONE;
+}*/
+
+
 /*
  * Function to register into Python namespace to allow the plugin writer to
  * return information to the user running sbatch.
@@ -65,13 +74,14 @@ static PyObject* slurm_user_msg(PyObject *self, PyObject *arg)
  * Function to register into Python namespace to allow the plugin writer to
  * write an info message into the log
  */
-static PyObject* slurm_info(PyObject *self, PyObject *arg)
+/*static PyObject* slurm_info(PyObject *self, PyObject *arg)
 {
 	PyObject* str = PyObject_Str(arg);
 	info("job_submit_python: %s", PyUnicode_AsUTF8(str));
 	Py_DECREF(str);
 	Py_RETURN_NONE;
 }
+*/
 
 /*
  * Function to register into Python namespace to allow the plugin writer to
@@ -92,9 +102,8 @@ static PyMethodDef SlurmMethods[] = {
 	{
 		"user_msg", slurm_user_msg, METH_O, ""
 	},
-	{
-		"info", slurm_info, METH_O, ""
-	},
+//	{
+//
 	{
 		"error", slurm_error, METH_O, ""
 	},
@@ -264,8 +273,8 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_time_t(job_desc, pJobDesc, begin_time);
 	insert_uint32_t(job_desc, pJobDesc, bitflags);
 	insert_char_star(job_desc, pJobDesc, burst_buffer);
-	insert_uint16_t(job_desc, pJobDesc, ckpt_interval);
-	insert_char_star(job_desc, pJobDesc, ckpt_dir);
+//	insert_uint16_t(job_desc, pJobDesc, ckpt_interval);
+//	insert_char_star(job_desc, pJobDesc, ckpt_dir);
 	insert_char_star(job_desc, pJobDesc, clusters);
 	insert_char_star(job_desc, pJobDesc, comment);
 	insert_uint16_t_to_bool(job_desc, pJobDesc, contiguous);
@@ -364,7 +373,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_uint64_t(job_desc, pJobDesc, fed_siblings_active);
 	insert_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
 	insert_char_star(job_desc, pJobDesc, origin_cluster);
-	insert_uint32_t(job_desc, pJobDesc, pack_job_offset);
+	//insert_uint32_t(job_desc, pJobDesc, pack_job_offset);
 	insert_uint16_t(job_desc, pJobDesc, x11);
 	insert_char_star(job_desc, pJobDesc, x11_magic_cookie);
 	insert_uint16_t(job_desc, pJobDesc, x11_target_port);
@@ -656,8 +665,8 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_time_t(job_desc, pJobDesc, begin_time);
 	retrieve_uint32_t(job_desc, pJobDesc, bitflags);
 	retrieve_char_star(job_desc, pJobDesc, burst_buffer);
-	retrieve_uint16_t(job_desc, pJobDesc, ckpt_interval);
-	retrieve_char_star(job_desc, pJobDesc, ckpt_dir);
+//	retrieve_uint16_t(job_desc, pJobDesc, ckpt_interval);
+//	retrieve_char_star(job_desc, pJobDesc, ckpt_dir);
 	retrieve_char_star(job_desc, pJobDesc, clusters);
 	retrieve_char_star(job_desc, pJobDesc, comment);
 	retrieve_uint16_t_as_bool(job_desc, pJobDesc, contiguous);
@@ -756,7 +765,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_active);
 	retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
 	retrieve_char_star(job_desc, pJobDesc, origin_cluster);
-	retrieve_uint32_t(job_desc, pJobDesc, pack_job_offset);
+//	retrieve_uint32_t(job_desc, pJobDesc, pack_job_offset);
 	retrieve_uint16_t(job_desc, pJobDesc, x11);
 	retrieve_char_star(job_desc, pJobDesc, x11_magic_cookie);
 	retrieve_uint16_t(job_desc, pJobDesc, x11_target_port);
