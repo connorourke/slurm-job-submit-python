@@ -395,7 +395,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 
 	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0)
 	insert_uint32_t(job_desc, pJobDesc, site_factor);
-        insert_char_star(job_desc, pJobDesc, container);
+//        insert_char_star(job_desc, pJobDesc, container);
 //        insert_uint16_t_to_bool(job_desc, pJobDesc, cron_job);
 //        insert_char_star(job_desc, pJobDesc, default_account);
 //        insert_char_star(job_desc, pJobDesc, default_qos);
@@ -814,7 +814,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 
 	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0)
 	retrieve_uint32_t(job_desc, pJobDesc, site_factor);
-        retrieve_char_star(job_desc, pJobDesc, container);
+//        retrieve_char_star(job_desc, pJobDesc, container);
 //        retrieve_uint16_t_as_bool(job_desc, pJobDesc, cron_job);
 //        retrieve_char_star(job_desc, pJobDesc, default_account);
 //        retrieve_char_star(job_desc, pJobDesc, default_qos);
