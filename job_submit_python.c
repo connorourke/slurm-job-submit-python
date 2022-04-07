@@ -42,15 +42,6 @@ static char *user_msg = NULL;
 
 static pthread_mutex_t python_lock = PTHREAD_MUTEX_INITIALIZER;
 
-/*static PyObject* slurm_info(PyObject *self, PyObject *arg)
-{
-	PyObject* str = PyObject_Str(arg);
-	info("job_submit_python: %s", PyUnicode_AsUTF8(str));
-	Py_DECREF(str);
-	Py_RETURN_NONE;
-}*/
-
-
 /*
  * Function to register into Python namespace to allow the plugin writer to
  * return information to the user running sbatch.
@@ -82,7 +73,6 @@ static PyObject* slurm_user_msg(PyObject *self, PyObject *arg)
 	Py_RETURN_NONE;
 }
 */
-
 /*
  * Function to register into Python namespace to allow the plugin writer to
  * write an error message into the log
@@ -102,8 +92,9 @@ static PyMethodDef SlurmMethods[] = {
 	{
 		"user_msg", slurm_user_msg, METH_O, ""
 	},
-//	{
-//
+/*	{
+		"info", slurm_info, METH_O, ""
+	},*/
 	{
 		"error", slurm_error, METH_O, ""
 	},
@@ -181,8 +172,8 @@ void print_python_error()
 
 		PyObject* pFormattedTbStr = PyObject_Str(pFormattedTb);
 
-		error("job_submit_python: %s", PyUnicode_AsUTF8(pFormattedTbStr));
-		error("job_submit_python: %s: %s", PyUnicode_AsUTF8(ptype), PyUnicode_AsUTF8(pvalue));
+		error("job2_submit_python: %s", PyUnicode_AsUTF8(pFormattedTbStr));
+		error("job2_submit_python: %s: %s", PyUnicode_AsUTF8(ptype), PyUnicode_AsUTF8(pvalue));
 
 		Py_DECREF(pFormattedTbStr);
 		Py_XDECREF(pvalue);
@@ -269,7 +260,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_uint32_t(job_desc, pJobDesc, alloc_sid);
 	insert_char_star_star(job_desc, pJobDesc, argv, argc);
 	insert_char_star(job_desc, pJobDesc, array_inx);
-	//insert_char_star(job_desc, pJobDesc, array_bitmap); // void*
+//	insert_char_star(job_desc, pJobDesc, array_bitmap); // void*
 	insert_time_t(job_desc, pJobDesc, begin_time);
 	insert_uint32_t(job_desc, pJobDesc, bitflags);
 	insert_char_star(job_desc, pJobDesc, burst_buffer);
@@ -353,9 +344,9 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_uint32_t(job_desc, pJobDesc, req_switch);
 	//select_jobinfo
 	insert_char_star(job_desc, pJobDesc, std_err);
-	insert_char_star(job_desc, pJobDesc, std_in);
+	insert_char_star(job_desc, pJobDesc,  std_in);
 	insert_char_star(job_desc, pJobDesc, std_out);
-	//insert_uint64_t_star(job_desc, pJobDesc, tres_req_cnt);
+//	insert_uint64_t_star(job_desc, pJobDesc, tres_req_cnt);
 	insert_uint32_t(job_desc, pJobDesc, wait4switch);
 	insert_char_star(job_desc, pJobDesc, wckey);
 
@@ -367,16 +358,19 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
 	insert_uint8_t(job_desc, pJobDesc, resv_port);
 	#endif
-	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0)
-	insert_char_star(job_desc, pJobDesc, cluster_features);
-	insert_char_star(job_desc, pJobDesc, extra);
+        #if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+        insert_char_star(job_desc, pJobDesc, cluster_features);
 	insert_uint64_t(job_desc, pJobDesc, fed_siblings_active);
 	insert_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
 	insert_char_star(job_desc, pJobDesc, origin_cluster);
-	//insert_uint32_t(job_desc, pJobDesc, pack_job_offset);
+	insert_uint32_t(job_desc, pJobDesc, pack_job_offset);
 	insert_uint16_t(job_desc, pJobDesc, x11);
 	insert_char_star(job_desc, pJobDesc, x11_magic_cookie);
 	insert_uint16_t(job_desc, pJobDesc, x11_target_port);
+        #endif	
+
+	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+	insert_char_star(job_desc, pJobDesc, extra);
 	#endif
 
 	#if SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(18,8,0)
@@ -386,7 +380,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_char_star(job_desc, pJobDesc, batch_features);
 	insert_char_star(job_desc, pJobDesc, cpus_per_tres);
 	insert_char_star(job_desc, pJobDesc, mem_per_tres);
-	//insert_void_star(job_desc, pJobDesc, script_buf);  // void*
+//	insert_void_star(job_desc, pJobDesc, script_buf);  // void*
 	insert_char_star(job_desc, pJobDesc, tres_bind);
 	insert_char_star(job_desc, pJobDesc, tres_freq);
 	insert_char_star(job_desc, pJobDesc, tres_per_job);
@@ -395,9 +389,32 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_char_star(job_desc, pJobDesc, tres_per_task);
 	#endif
 
+	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+        insert_char_star(job_desc, pJobDesc, x11_target);
+        #endif
+
 	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0)
 	insert_uint32_t(job_desc, pJobDesc, site_factor);
-	insert_char_star(job_desc, pJobDesc, x11_target);
+        insert_char_star(job_desc, pJobDesc, container);
+//        insert_uint16_t_to_bool(job_desc, pJobDesc, cron_job);
+//        insert_char_star(job_desc, pJobDesc, default_account);
+//        insert_char_star(job_desc, pJobDesc, default_qos);
+// 	insert_uint32_t(job_desc, pJobDesc,min_mem_per_cpu);
+        insert_char_star(job_desc, pJobDesc, origin_cluster);
+        insert_uint16_t(job_desc, pJobDesc, ntasks_per_tres);
+        insert_uint16_t(job_desc, pJobDesc, het_job_offset);
+        insert_char_star(job_desc, pJobDesc, req_context);
+        insert_uint64_t(job_desc, pJobDesc, fed_siblings_active);
+        insert_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
+        insert_char_star(job_desc, pJobDesc, cluster_features);
+//        insert_uint16_t(job_desc, pJobDesc, oversubscribe);
+//        insert_char_star(job_desc, pJobDesc, username);
+        insert_char_star(job_desc, pJobDesc, origin_cluster);
+        insert_char_star(job_desc, pJobDesc, extra);
+        insert_uint16_t(job_desc, pJobDesc, x11);
+        insert_char_star(job_desc, pJobDesc, x11_magic_cookie);
+        insert_char_star(job_desc, pJobDesc, x11_target);
+        insert_uint16_t(job_desc, pJobDesc, x11_target_port);
 	#endif
 
 	PyObject *p_types_module = PyImport_ImportModule("types");
@@ -653,6 +670,7 @@ do { \
  */
 void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 {
+
 	retrieve_char_star(job_desc, pJobDesc, account);
 	retrieve_char_star(job_desc, pJobDesc, acctg_freq);
 	retrieve_char_star(job_desc, pJobDesc, admin_comment);
@@ -661,7 +679,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_uint32_t(job_desc, pJobDesc, alloc_sid);
 	retrieve_char_star_star(job_desc, pJobDesc, argv, argc);
 	retrieve_char_star(job_desc, pJobDesc, array_inx);
-	//retrieve_char_star(job_desc, pJobDesc, array_bitmap); // void*
+//	retrieve_char_star(job_desc, pJobDesc, array_bitmap); // void*
 	retrieve_time_t(job_desc, pJobDesc, begin_time);
 	retrieve_uint32_t(job_desc, pJobDesc, bitflags);
 	retrieve_char_star(job_desc, pJobDesc, burst_buffer);
@@ -745,9 +763,9 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_uint32_t(job_desc, pJobDesc, req_switch);
 	//select_jobinfo
 	retrieve_char_star(job_desc, pJobDesc, std_err);
-	retrieve_char_star(job_desc, pJobDesc, std_in);
+	retrieve_char_star(job_desc, pJobDesc,  std_in);
 	retrieve_char_star(job_desc, pJobDesc, std_out);
-	//retrieve_uint64_t_star(job_desc, pJobDesc, tres_req_cnt);
+//	retrieve_uint64_t_star(job_desc, pJobDesc, tres_req_cnt);
 	retrieve_uint32_t(job_desc, pJobDesc, wait4switch);
 	retrieve_char_star(job_desc, pJobDesc, wckey);
 
@@ -759,16 +777,19 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
 	retrieve_uint8_t(job_desc, pJobDesc, resv_port);
 	#endif
-	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0)
-	retrieve_char_star(job_desc, pJobDesc, cluster_features);
-	retrieve_char_star(job_desc, pJobDesc, extra);
+        #if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+        retrieve_char_star(job_desc, pJobDesc, cluster_features);
 	retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_active);
 	retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
 	retrieve_char_star(job_desc, pJobDesc, origin_cluster);
-//	retrieve_uint32_t(job_desc, pJobDesc, pack_job_offset);
+	retrieve_uint32_t(job_desc, pJobDesc, pack_job_offset);
 	retrieve_uint16_t(job_desc, pJobDesc, x11);
 	retrieve_char_star(job_desc, pJobDesc, x11_magic_cookie);
 	retrieve_uint16_t(job_desc, pJobDesc, x11_target_port);
+        #endif	
+
+	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+	retrieve_char_star(job_desc, pJobDesc, extra);
 	#endif
 
 	#if SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(18,8,0)
@@ -778,7 +799,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_char_star(job_desc, pJobDesc, batch_features);
 	retrieve_char_star(job_desc, pJobDesc, cpus_per_tres);
 	retrieve_char_star(job_desc, pJobDesc, mem_per_tres);
-	//retrieve_void_star(job_desc, pJobDesc, script_buf);  // void*
+//	retrieve_void_star(job_desc, pJobDesc, script_buf);  // void*
 	retrieve_char_star(job_desc, pJobDesc, tres_bind);
 	retrieve_char_star(job_desc, pJobDesc, tres_freq);
 	retrieve_char_star(job_desc, pJobDesc, tres_per_job);
@@ -787,10 +808,36 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_char_star(job_desc, pJobDesc, tres_per_task);
 	#endif
 
+	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+        retrieve_char_star(job_desc, pJobDesc, x11_target);
+        #endif
+
 	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0)
 	retrieve_uint32_t(job_desc, pJobDesc, site_factor);
-	retrieve_char_star(job_desc, pJobDesc, x11_target);
+        retrieve_char_star(job_desc, pJobDesc, container);
+//        retrieve_uint16_t_as_bool(job_desc, pJobDesc, cron_job);
+//        retrieve_char_star(job_desc, pJobDesc, default_account);
+//        retrieve_char_star(job_desc, pJobDesc, default_qos);
+// 	retrieve_uint32_t(job_desc, pJobDesc,min_mem_per_cpu);
+        retrieve_char_star(job_desc, pJobDesc, origin_cluster);
+        retrieve_uint16_t(job_desc, pJobDesc, ntasks_per_tres);
+        retrieve_uint16_t(job_desc, pJobDesc, het_job_offset);
+        retrieve_char_star(job_desc, pJobDesc, req_context);
+        retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_active);
+        retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
+        retrieve_char_star(job_desc, pJobDesc, cluster_features);
+//        retrieve_uint16_t(job_desc, pJobDesc, oversubscribe);
+//        retrieve_char_star(job_desc, pJobDesc, username);
+        retrieve_char_star(job_desc, pJobDesc, origin_cluster);
+        retrieve_char_star(job_desc, pJobDesc, extra);
+        retrieve_uint16_t(job_desc, pJobDesc, x11);
+        retrieve_char_star(job_desc, pJobDesc, x11_magic_cookie);
+        retrieve_char_star(job_desc, pJobDesc, x11_target);
+        retrieve_uint16_t(job_desc, pJobDesc, x11_target_port);
 	#endif
+
+
+
 }
 
 /*
@@ -815,32 +862,6 @@ PyObject* load_script()
 	}
 
 	error("job_submit_python: Failed to load \"%s\"", script_name);
-	print_python_error();
-
-	return pModuleInitial;
-}
-/*
- * Load the Python modify-job script and return it
- */
-PyObject* load_modify_script()
-{
-	char script_name[] = "job_modify";
-
-	// Import the job_submit module
-	PyObject *pModuleInitial = PyImport_ImportModule(script_name);
-
-	if (pModuleInitial != NULL)
-	{
-		verbose("job_modify_python: Loaded \"%s\"", script_name);
-
-		// Reload the module to ensure live updating the script works
-		PyObject* pModule = PyImport_ReloadModule(pModuleInitial);
-		Py_DECREF(pModuleInitial);
-
-		return pModule;
-	}
-
-	error("job_modify_python: Failed to load \"%s\"", script_name);
 	print_python_error();
 
 	return pModuleInitial;
@@ -932,80 +953,9 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char
 	return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t modify_uid)
-
+extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid)
 {
 	slurm_mutex_lock(&python_lock);
-	PyObject* pModule = load_modify_script();
-	if (pModule != NULL)
-	{
-		PyObject* pFunc = PyObject_GetAttrString(pModule, "job_modify");
-		if (pFunc && PyCallable_Check(pFunc))
-		{
-			PyObject* pJobDesc = create_job_desc_dict(job_desc);
-			PyObject* p_modify_uid = PyLong_FromUnsignedLongLong(modify_uid);
-
-			PyObject* pRc = PyObject_CallFunctionObjArgs(pFunc, pJobDesc, p_modify_uid, NULL);
-			Py_DECREF(p_modify_uid);
-
-			if (pRc != NULL)
-			{
-				if(!PyLong_Check(pRc))
-				{
-					error("job_modify_python: return value of function must be an integer, not %s", Py_TYPE(pRc)->tp_name);
-					Py_DECREF(pRc);
-					Py_DECREF(pJobDesc);
-					Py_DECREF(pFunc);
-					Py_DECREF(pModule);
-					return SLURM_ERROR;
-				}
-				long rc = PyLong_AsLong(pRc);
-				Py_DECREF(pRc);
-
-				retrieve_job_desc_dict(job_desc, pJobDesc);
-				Py_DECREF(pJobDesc);
-
-				if (rc != SLURM_SUCCESS)
-				{
-					Py_DECREF(pFunc);
-					Py_DECREF(pModule);
-					slurm_mutex_unlock(&python_lock);
-					return rc;
-				}
-			}
-			else
-			{
-				Py_DECREF(pJobDesc);
-				Py_DECREF(pFunc);
-				Py_DECREF(pModule);
-
-				error("job_modify_python: Call failed");
-				print_python_error();
-
-				slurm_mutex_unlock(&python_lock);
-				return SLURM_ERROR;
-			}
-		}
-		else
-		{
-			error("job_modify_python: Cannot find function \"%s\"", "job_modify");
-			print_python_error();
-
-			Py_XDECREF(pFunc);
-			Py_DECREF(pModule);
-			slurm_mutex_unlock(&python_lock);
-			return SLURM_ERROR;
-		}
-		Py_XDECREF(pFunc);
-		Py_DECREF(pModule);
-	}
-	else
-	{
-		print_python_error();
-		slurm_mutex_unlock(&python_lock);
-		return SLURM_ERROR;
-	}
-
 	slurm_mutex_unlock(&python_lock);
 	return SLURM_SUCCESS;
 }

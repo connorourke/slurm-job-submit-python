@@ -1,0 +1,33 @@
+SLURM_INCLUDE_DIR ?= /usr/include/slurm
+SLURM_SRC_DIR ?= /slurm/
+PYTHON_CONFIG ?= python3.6-config
+PYTHON_INCLUDE_FLAGS=$(shell $(PYTHON_CONFIG) --includes)
+PYTHON_LIBRARY_FLAGS=$(shell $(PYTHON_CONFIG) --libs)
+
+PYTHON_INCLUDE_FLAGS=/apps/mambaforge/include/python3.9/
+PYTHON_LIBRARY_FLAGS=/apps/mambaforge/lib/
+
+
+
+SLURM_PLUGIN_INSTALL_DIR=/usr/lib64/slurm/
+SLURM_SCRIPT_DIR=/etc/slurm
+
+CC=gcc
+CFLAGS=-shared -fPIC -Wall -std=c99 -O3 -Wfatal-errors -DDEFAULT_SCRIPT_DIR=\"$(SLURM_SCRIPT_DIR)\"
+
+SOURCES=job_submit_python.c
+OUTPUT_LIBRARY=job_submit_python.so
+
+all: $(SOURCES) $(OUTPUT_LIBRARY)
+
+$(OUTPUT_LIBRARY): $(SOURCES)
+        $(CC) $(SOURCES) -o $@ -I $(SLURM_INCLUDE_DIR) -I /tmp/slurm -I $(SLURM_SRC_DIR) -I $(PYTHON_INCLUDE_FLAGS) -L$(PYTHON_LIBRARY_FLAGS) $(CFLAGS)
+
+clean:
+        rm -f $(OUTPUT_LIBRARY)
+
+install: all
+        install $(OUTPUT_LIBRARY) $(SLURM_PLUGIN_INSTALL_DIR)
+
+test:
+        tests/run_local.sh
