@@ -403,7 +403,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
         insert_char_star(job_desc, pJobDesc, origin_cluster);
         insert_uint16_t(job_desc, pJobDesc, ntasks_per_tres);
         insert_uint16_t(job_desc, pJobDesc, het_job_offset);
-        insert_char_star(job_desc, pJobDesc, req_context);
+//        insert_char_star(job_desc, pJobDesc, req_context);
         insert_uint64_t(job_desc, pJobDesc, fed_siblings_active);
         insert_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
         insert_char_star(job_desc, pJobDesc, cluster_features);
@@ -822,7 +822,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
         retrieve_char_star(job_desc, pJobDesc, origin_cluster);
         retrieve_uint16_t(job_desc, pJobDesc, ntasks_per_tres);
         retrieve_uint16_t(job_desc, pJobDesc, het_job_offset);
-        retrieve_char_star(job_desc, pJobDesc, req_context);
+//        retrieve_char_star(job_desc, pJobDesc, req_context);
         retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_active);
         retrieve_uint64_t(job_desc, pJobDesc, fed_siblings_viable);
         retrieve_char_star(job_desc, pJobDesc, cluster_features);
