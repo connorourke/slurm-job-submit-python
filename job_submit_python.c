@@ -279,7 +279,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_uint32_t(job_desc, pJobDesc, delay_boot);
 	insert_char_star(job_desc, pJobDesc, dependency);
 	insert_time_t(job_desc, pJobDesc, end_time);
-	insert_environment_dict(job_desc, pJobDesc, environment, env_size);
+//	insert_environment_dict(job_desc, pJobDesc, environment, env_size);
 	insert_char_star(job_desc, pJobDesc, exc_nodes);
 	insert_char_star(job_desc, pJobDesc, features);
 	insert_uint32_t(job_desc, pJobDesc, group_id);
@@ -355,7 +355,7 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_uint32_t(job_desc, pJobDesc, group_number);
 	insert_uint32_t(job_desc, pJobDesc, numpack);
 	insert_uint32_t(job_desc, pJobDesc, pack_leader);
-	insert_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
+	//insert_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
 	insert_uint8_t(job_desc, pJobDesc, resv_port);
 	#endif
         #if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
@@ -389,9 +389,9 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 	insert_char_star(job_desc, pJobDesc, tres_per_task);
 	#endif
 
-	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
-        insert_char_star(job_desc, pJobDesc, x11_target);
-        #endif
+//	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
+//        insert_char_star(job_desc, pJobDesc, x11_target);
+//        #endif
 
 	#if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(19,5,0)
 	insert_uint32_t(job_desc, pJobDesc, site_factor);
@@ -411,10 +411,10 @@ PyObject* create_job_desc_dict(struct job_descriptor *job_desc)
 //        insert_char_star(job_desc, pJobDesc, username);
         insert_char_star(job_desc, pJobDesc, origin_cluster);
         insert_char_star(job_desc, pJobDesc, extra);
-        insert_uint16_t(job_desc, pJobDesc, x11);
-        insert_char_star(job_desc, pJobDesc, x11_magic_cookie);
-        insert_char_star(job_desc, pJobDesc, x11_target);
-        insert_uint16_t(job_desc, pJobDesc, x11_target_port);
+//        insert_uint16_t(job_desc, pJobDesc, x11);
+//        insert_char_star(job_desc, pJobDesc, x11_magic_cookie);
+//        insert_char_star(job_desc, pJobDesc, x11_target);
+//        insert_uint16_t(job_desc, pJobDesc, x11_target_port);
 	#endif
 
 	PyObject *p_types_module = PyImport_ImportModule("types");
@@ -698,7 +698,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_uint32_t(job_desc, pJobDesc, delay_boot);
 	retrieve_char_star(job_desc, pJobDesc, dependency);
 	retrieve_time_t(job_desc, pJobDesc, end_time);
-	retrieve_environment_dict(job_desc, pJobDesc, environment, env_size);
+//	retrieve_environment_dict(job_desc, pJobDesc, environment, env_size);
 	retrieve_char_star(job_desc, pJobDesc, exc_nodes);
 	retrieve_char_star(job_desc, pJobDesc, features);
 	retrieve_uint32_t(job_desc, pJobDesc, group_id);
@@ -774,7 +774,7 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 	retrieve_uint32_t(job_desc, pJobDesc, group_number);
 	retrieve_uint32_t(job_desc, pJobDesc, numpack);
 	retrieve_uint32_t(job_desc, pJobDesc, pack_leader);
-	retrieve_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
+//	retrieve_environment_dict(job_desc, pJobDesc, pelog_env, pelog_env_size);
 	retrieve_uint8_t(job_desc, pJobDesc, resv_port);
 	#endif
         #if SLURM_VERSION_NUMBER >= SLURM_VERSION_NUM(17,11,0) && SLURM_VERSION_NUMBER < SLURM_VERSION_NUM(20,11,0)
@@ -830,10 +830,10 @@ void retrieve_job_desc_dict(struct job_descriptor *job_desc, PyObject* pJobDesc)
 //        retrieve_char_star(job_desc, pJobDesc, username);
         retrieve_char_star(job_desc, pJobDesc, origin_cluster);
         retrieve_char_star(job_desc, pJobDesc, extra);
-        retrieve_uint16_t(job_desc, pJobDesc, x11);
-        retrieve_char_star(job_desc, pJobDesc, x11_magic_cookie);
-        retrieve_char_star(job_desc, pJobDesc, x11_target);
-        retrieve_uint16_t(job_desc, pJobDesc, x11_target_port);
+//        retrieve_uint16_t(job_desc, pJobDesc, x11);
+//        retrieve_char_star(job_desc, pJobDesc, x11_magic_cookie);
+//        retrieve_char_star(job_desc, pJobDesc, x11_target);
+//        retrieve_uint16_t(job_desc, pJobDesc, x11_target_port);
 	#endif
 
 
